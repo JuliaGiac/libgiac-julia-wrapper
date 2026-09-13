@@ -350,6 +350,11 @@ public:
     int zint_sign() const;
     std::vector<uint8_t> zint_to_bytes() const;
 
+    // _REAL type (MPFR arbitrary-precision floats)
+    int64_t real_prec() const;
+    void real_to_mpfr(void* rop) const;
+    static Gen from_mpfr(const void* op);
+
     // _CPLX type
     Gen cplx_re() const;
     Gen cplx_im() const;

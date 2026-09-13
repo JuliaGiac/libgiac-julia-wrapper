@@ -109,6 +109,8 @@ JLCXX_MODULE define_julia_module(jlcxx::Module& mod)
         .method("zint_to_string", &Gen::zint_to_string)
         .method("zint_sign", &Gen::zint_sign)
         .method("zint_to_bytes", &Gen::zint_to_bytes)
+        .method("real_prec", &Gen::real_prec)
+        .method("real_to_mpfr", &Gen::real_to_mpfr)
         .method("cplx_re", &Gen::cplx_re)
         .method("cplx_im", &Gen::cplx_im)
         .method("frac_num", &Gen::frac_num)
@@ -215,6 +217,7 @@ JLCXX_MODULE define_julia_module(jlcxx::Module& mod)
     mod.method("make_complex", &make_complex);
     mod.method("make_fraction", &make_fraction);
     mod.method("make_vect", &make_vect);
+    mod.method("gen_from_mpfr", &Gen::from_mpfr);
 
     // ========================================================================
     // Gen Pointer Management (Feature 051: Direct to_giac without strings)

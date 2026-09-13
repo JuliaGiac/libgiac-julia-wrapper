@@ -646,6 +646,46 @@ std::vector<uint8_t> Gen::zint_to_bytes() const {
     return result;
 }
 
+int64_t Gen::real_prec() const {
+    if (impl_->g.type != giac::_REAL) {
+        throw std::runtime_error("gen is not a real");
+    }
+#ifdef HAVE_LIBMPFR
+    return static_cast<int64_t>(mpfr_get_prec(impl_->g._REALptr->inf));
+#else
+    return 53;
+#endif
+}
+
+void Gen::real_to_mpfr(void* rop) const {
+    if (impl_->g.type != giac::_REAL) {
+        throw std::runtime_error("gen is not a real");
+    }
+#ifdef HAVE_LIBMPFR
+    if (rop == nullptr) {
+        throw std::invalid_argument("destination pointer cannot be null");
+    }
+    mpfr_ptr dest = static_cast<mpfr_ptr>(rop);
+    mpfr_set(dest, impl_->g._REALptr->inf, MPFR_RNDN);
+#else
+    throw std::runtime_error("MPFR not available in this build");
+#endif
+}
+
+Gen Gen::from_mpfr(const void* op) {
+#ifdef HAVE_LIBMPFR
+    if (op == nullptr) {
+        throw std::invalid_argument("source pointer cannot be null");
+    }
+    mpfr_srcptr src = static_cast<mpfr_srcptr>(op);
+    giac::real_object ro(*src);
+    giac::gen g(ro);
+    return Gen(std::make_unique<GenImpl>(std::move(g)));
+#else
+    throw std::runtime_error("MPFR not available in this build");
+#endif
+}
+
 Gen Gen::cplx_re() const {
     // REQ-C50, C51: Returns real part for _CPLX_, self for non-complex
     if (impl_->g.type == giac::_CPLX) {

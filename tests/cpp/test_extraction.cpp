@@ -354,6 +354,60 @@ TEST(map_accessors_throw_on_int) {
     std::cout << "map_size/map_keys/map_values(42) throw ";
 }
 
+// ============================================================================
+// REAL (MPFR) accessors
+// ============================================================================
+
+TEST(real_prec_throws_on_int) {
+    Gen g(static_cast<int64_t>(42));
+    bool threw = false;
+    try {
+        g.real_prec();
+    } catch (const std::runtime_error& e) {
+        threw = true;
+    }
+    assert(threw);
+    std::cout << "real_prec(42) throws ";
+}
+
+TEST(real_prec_throws_on_double) {
+    Gen g(3.14);
+    bool threw = false;
+    try {
+        g.real_prec();
+    } catch (const std::runtime_error& e) {
+        threw = true;
+    }
+    assert(threw);
+    std::cout << "real_prec(3.14) throws ";
+}
+
+TEST(real_to_mpfr_null_throws) {
+    Gen g = giac_eval("1.00000000000000000000000000000000000000000000000001");
+    if (g.type() == 3) { // GENTYPE_REAL
+        bool threw = false;
+        try {
+            g.real_to_mpfr(nullptr);
+        } catch (const std::invalid_argument& e) {
+            threw = true;
+        }
+        assert(threw);
+        assert(g.real_prec() > 53);
+        std::cout << "real_to_mpfr(nullptr) throws, prec=" << g.real_prec() << " ";
+    }
+}
+
+TEST(from_mpfr_null_throws) {
+    bool threw = false;
+    try {
+        Gen::from_mpfr(nullptr);
+    } catch (const std::invalid_argument& e) {
+        threw = true;
+    }
+    assert(threw);
+    std::cout << "from_mpfr(nullptr) throws ";
+}
+
 int main() {
     std::cout << "=== GIAC Wrapper Value Extraction Tests ===" << std::endl;
 
@@ -404,6 +458,12 @@ int main() {
 
     // Map accessors (REQ-C71..C74)
     RUN_TEST(map_accessors_throw_on_int);
+
+    // Real / MPFR accessors
+    RUN_TEST(real_prec_throws_on_int);
+    RUN_TEST(real_prec_throws_on_double);
+    RUN_TEST(real_to_mpfr_null_throws);
+    RUN_TEST(from_mpfr_null_throws);
 
     std::cout << "=== All extraction tests passed ===" << std::endl;
     return 0;
