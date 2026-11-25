@@ -1,6 +1,6 @@
 # baseURL is overridden in CI by the URL GitHub Pages reports.
 baseURL = "https://juliagiac.github.io/libgiac-julia-wrapper/"
-title = "JuliaGiac / libgiac-julia-wrapper"
+title = "libgiac-julia-wrapper"
 disableKinds = ["taxonomy", "term", "RSS", "sitemap"]
 
 [params]
@@ -23,3 +23,8 @@ description = "The C++ bridge between Giac and Julia."
     name = "Platform support"
     pageRef = "/platforms"
     weight = 4
+
+# Code is highlighted with CSS classes; static/syntax.css holds the light
+# (github) and dark (github-dark) palettes, shared with juliagiac.github.io.
+[markup.highlight]
+noClasses = false
