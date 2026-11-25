@@ -88,7 +88,10 @@ JLCXX_MODULE define_julia_module(jlcxx::Module& mod)
         .method("set_precision", &GiacContext::set_precision)
         .method("get_precision", &GiacContext::get_precision)
         .method("is_complex_mode", &GiacContext::is_complex_mode)
-        .method("set_complex_mode", &GiacContext::set_complex_mode);
+        .method("set_complex_mode", &GiacContext::set_complex_mode)
+        .method("log_capture_begin", &GiacContext::log_capture_begin)
+        .method("log_capture_end", &GiacContext::log_capture_end)
+        .method("log_capture_depth", &GiacContext::log_capture_depth);
 
     // Register Gen type
     mod.add_type<Gen>("Gen")
@@ -148,6 +151,15 @@ JLCXX_MODULE define_julia_module(jlcxx::Module& mod)
         static_cast<Gen(*)(const std::string&)>(&giac_eval));
     mod.method("giac_eval",
         static_cast<Gen(*)(const std::string&, GiacContext&)>(&giac_eval));
+
+    // Register log capture on the thread-local default context. The
+    // GiacContext overloads are registered as methods above.
+    mod.method("log_capture_begin",
+        static_cast<void(*)()>(&log_capture_begin));
+    mod.method("log_capture_end",
+        static_cast<std::string(*)()>(&log_capture_end));
+    mod.method("log_capture_depth",
+        static_cast<int(*)()>(&log_capture_depth));
 
     // Register generic dispatch functions (Tier 2)
     mod.method("apply_func0", &apply_func0);

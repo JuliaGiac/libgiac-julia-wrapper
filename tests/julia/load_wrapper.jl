@@ -17,8 +17,14 @@ using Libdl
 if !isdefined(@__MODULE__, :__libgiac_wrapper_loaded__)
     # Meson outputs the shared library to `builddir/src/libgiac_wrapper.so`
     # (the `justfile` runs `meson setup builddir`). Resolve relative to this
-    # file so the path works regardless of the caller's cwd.
-    const libgiac_wrapper = joinpath(@__DIR__, "..", "..", "builddir", "src", "libgiac_wrapper")
+    # file so the path works regardless of the caller's cwd. Set
+    # `GIAC_WRAPPER_LIB` to test a library built elsewhere (out-of-tree
+    # build dir, local BinaryBuilder product).
+    const libgiac_wrapper = let env_path = get(ENV, "GIAC_WRAPPER_LIB", "")
+        isempty(env_path) ?
+            joinpath(@__DIR__, "..", "..", "builddir", "src", "libgiac_wrapper") :
+            env_path
+    end
     @wrapmodule(() -> libgiac_wrapper)
 
     function __init__()
