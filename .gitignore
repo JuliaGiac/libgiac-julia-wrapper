@@ -23,3 +23,10 @@
 !.github/dependabot.yml
 !.github/workflows/
 !.github/workflows/*.yml
+
+# Web site (Hugo sources in site/, build output ignored)
+!site/
+!site/**
+site/public/
+site/resources/
+site/.hugo_build.lock

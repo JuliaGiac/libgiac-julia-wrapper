@@ -6,12 +6,15 @@ name: CI
 
 on:
   # Every branch is built, so pushing without opening a PR still gets CI.
+  # Changes to the web site alone (site/, pages.yml) do not touch the build.
   push:
     branches: ['**']
     tags:
       - 'v*'
+    paths-ignore: ['site/**', '.github/workflows/pages.yml']
   pull_request:
     branches: [main]
+    paths-ignore: ['site/**', '.github/workflows/pages.yml']
 
 # Supersede an in-flight run when a branch is pushed to again. Not applied to
 # `main` or to tags, where every commit deserves its own recorded result.
