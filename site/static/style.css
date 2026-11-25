@@ -31,3 +31,14 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
          display: flex; flex-wrap: wrap; gap: .4rem 1.1rem; }
 footer { margin-top: 3rem; border-top: 1px solid var(--border);
          padding-top: 1rem; font-size: .9rem; }
+
+/* Logo in the brand link, and the page navigation */
+.brand { display: inline-flex; align-items: center; gap: .55rem; }
+nav { display: flex; flex-wrap: wrap; gap: .3rem 1.2rem; margin-top: .8rem;
+      padding-top: .6rem; border-top: 1px solid var(--border); }
+nav a { text-decoration: none; font-weight: 600; }
+nav a[aria-current="page"] { text-decoration: underline; }
+h1 { margin-top: 0; }
+table { border-collapse: collapse; margin: 1rem 0; }
+th, td { border: 1px solid var(--border); padding: .35rem .6rem; text-align: left;
+         vertical-align: top; }
