@@ -1,7 +1,6 @@
-/* JuliaGiac site styles, shared by juliagiac.github.io and the project
-   sites (giac, libgiac-julia-wrapper). Keep the copies identical; the
-   reference is JuliaGiac/juliagiac.github.io static/style.css.
-   Palette from JuliaGiac/.github brand/README.md. */
+/* Managed by JuliaGiac/site-kit (hugo/static/style.css). Edit it there, then run sync.jl. */
+/* JuliaGiac site styles, shared by https://juliagiac.github.io/ and the
+   project sites. Palette from brand/README.md. */
 :root {
   --ink: #222326; --paper: #F5F5F7; --muted: #5f6368;
   --red: #CB3C33; --green: #389826; --purple: #9558B2; --blue: #4063D8;
