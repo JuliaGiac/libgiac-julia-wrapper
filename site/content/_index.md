@@ -27,33 +27,15 @@ Giac.jl depends on it.
 
 ## What it provides
 
-- **Evaluation**: `giac_eval(expr)` in a thread-local default context, and
-  `giac_eval(expr, ctx)` in a `GiacContext` that keeps its own variable
-  bindings and settings.
-- **Function dispatch**: direct wrappers for about 25 common operations, and
-  `apply_func0/1/2/3/N` to call any Giac function by name without going
-  through a string.
-- **`Gen`**, an opaque `giac::gen`: constructors, typed accessors (integers,
-  big integers, rationals, complex numbers, vectors, symbolic trees, maps),
-  predicates and arithmetic operators.
-- **Help and introspection**: Giac's command database and function tables.
-
-The [README](https://github.com/JuliaGiac/libgiac-julia-wrapper#readme) lists
-the full API and the known platform issues.
+Evaluation in a default context or in isolated `GiacContext`s, direct calls
+to any Giac function by name, an opaque `Gen` type with typed accessors and
+operators, and Giac's help database. See the [API](api/).
 
 ## Building it yourself
 
-Only needed to work on the wrapper itself. It builds with
-[Meson](https://mesonbuild.com/) against CxxWrap's `libcxxwrap-julia` and
-libgiac:
-
-```sh
-just setup   # meson setup builddir
-just build   # meson compile -C builddir
-just test    # meson test -C builddir
-```
-
-Issues go to the
+Only needed to work on the wrapper itself: see
+[Building and testing](building/), and [Platform support](platforms/) for
+the known Windows issue. Issues go to the
 [issue tracker](https://github.com/JuliaGiac/libgiac-julia-wrapper/issues).
 
 ## Part of JuliaGiac

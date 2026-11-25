@@ -5,3 +5,21 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap"]
 
 [params]
 description = "The C++ bridge between Giac and Julia."
+
+[menus]
+  [[menus.main]]
+    name = "Overview"
+    pageRef = "/"
+    weight = 1
+  [[menus.main]]
+    name = "API"
+    pageRef = "/api"
+    weight = 2
+  [[menus.main]]
+    name = "Building and testing"
+    pageRef = "/building"
+    weight = 3
+  [[menus.main]]
+    name = "Platform support"
+    pageRef = "/platforms"
+    weight = 4

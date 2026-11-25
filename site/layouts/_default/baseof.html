@@ -5,18 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ .Title }} · {{ site.Title }}{{ end }}</title>
   <meta name="description" content="{{ site.Params.description }}">
+  <link rel="icon" href="{{ "img/favicon.svg" | relURL }}" type="image/svg+xml">
+  <link rel="icon" href="{{ "img/favicon.png" | relURL }}" type="image/png">
+  <link rel="apple-touch-icon" href="{{ "img/apple-touch-icon.png" | relURL }}">
   <link rel="stylesheet" href="{{ "style.css" | relURL }}">
 </head>
 <body>
   <header>
-    <a class="brand" href="{{ "/" | relURL }}">{{ site.Title }}</a>
+    <a class="brand" href="{{ site.Home.RelPermalink }}"><picture><source media="(prefers-color-scheme: dark)" srcset="{{ "img/juliagiac-mark-light.svg" | relURL }}"><img src="{{ "img/juliagiac-mark.svg" | relURL }}" alt="" width="36" height="36"></picture>{{ site.Title }}</a>
     {{ with site.Params.description }}<p class="tagline">{{ . }}</p>{{ end }}
+    {{ with site.Menus.main }}
+    <nav>
+      {{ range . }}<a href="{{ .URL | relURL }}"{{ if $.IsMenuCurrent "main" . }} aria-current="page"{{ end }}>{{ .Name }}</a>{{ end }}
+    </nav>
+    {{ end }}
   </header>
   <main>
     {{ block "main" . }}{{ end }}
   </main>
   <footer>
-    {{ block "footer" . }}{{ end }}
+    {{ block "footer" . }}{{ partial "footer.html" . }}{{ end }}
   </footer>
 </body>
 </html>
