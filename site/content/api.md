@@ -48,6 +48,33 @@ From Julia, build small integers with `Gen(Int32(n))`: CxxWrap does not tell
 the `int64_t` and `double` constructors apart, so `Gen(Int64(n))` gives a
 floating-point `Gen`.
 
+## Log capture
+
+GIAC writes informational messages to its log stream (stderr by default),
+for instance `// ∫ ~= 0.272198261288` when a definite integral is returned
+unevaluated. The capture API redirects that stream to an in-memory buffer,
+so the text can be retrieved separately from the result:
+
+- `log_capture_begin()`, `log_capture_end()` and `log_capture_depth()` act on
+  the default context; the same three names taking a `GiacContext` act on
+  that context.
+- The capture is installed on the context, so every evaluation path that uses
+  it is covered: `giac_eval`, `apply_func0/1/2/3/N`, the direct wrappers and
+  `Gen` methods.
+- Captures nest; the text of an inner capture is also appended to the
+  enclosing one. `log_capture_end()` without a matching begin throws.
+- Messages GIAC writes straight to `std::cerr`/`std::cout`, bypassing its log
+  stream, are not captured.
+
+```julia
+log_capture_begin()
+value = giac_eval("integrate(ln(1+x)/(1+x^2),x,0,1)")
+log = log_capture_end()      # "// ∫ ~= 0.272198261288\n"
+to_string(value)             # "integrate(ln(1+x)/(1+x^2),x,0,1)"
+```
+
+Giac.jl wraps this as `evaluate_with_diagnostics`.
+
 ## Help and introspection
 
 - `init_help(path_to_aide_cas)` loads Giac's command database up front, so

@@ -66,6 +66,41 @@ Gen giac_eval(const std::string& expr);
 Gen giac_eval(const std::string& expr, GiacContext& ctx);
 
 // ============================================================================
+// Log Capture
+// ============================================================================
+//
+// GIAC writes informational messages (e.g. "// ∫ ~= 0.272198261288" when a
+// definite integral is returned unevaluated) to the per-context `logptr`
+// stream, which defaults to stderr. These functions temporarily redirect
+// that stream to an in-memory buffer so the text can be returned to the
+// caller, separately from the evaluation result.
+//
+// Captures act on the context itself, not on individual entry points, so
+// every evaluation path that uses the context is covered: giac_eval,
+// apply_func0/1/2/3/N, the Tier 1 wrappers and Gen methods.
+//
+// Captures nest: log_capture_end() restores the stream that was active at
+// the matching log_capture_begin(), and the text of an inner capture is
+// also appended to the enclosing capture.
+
+/**
+ * @brief Start capturing the log stream of the thread-local default context
+ */
+void log_capture_begin();
+
+/**
+ * @brief Stop the innermost capture of the default context
+ * @return Text written to the log stream since the matching begin
+ * @throws std::logic_error if no capture is active
+ */
+std::string log_capture_end();
+
+/**
+ * @brief Number of active captures on the default context
+ */
+int log_capture_depth();
+
+// ============================================================================
 // Generic Dispatch (Tier 2)
 // ============================================================================
 
@@ -301,6 +336,12 @@ public:
     // Warning handler
     void set_warning_handler(std::function<void(const std::string&)> handler);
     void clear_warning_handler();
+
+    // Log capture (same semantics as the free log_capture_* functions,
+    // applied to this context's log stream)
+    void log_capture_begin();
+    std::string log_capture_end();
+    int log_capture_depth() const;
 
 private:
     std::unique_ptr<GiacContextImpl> impl_;

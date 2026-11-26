@@ -18,8 +18,56 @@
 
 #include "giac_impl.h"
 #include <mutex>
+#include <sstream>
+#include <stdexcept>
 
 namespace giac_julia {
+
+// ============================================================================
+// Log capture stack (hidden from header)
+// ============================================================================
+//
+// Redirects a giac::context's `logptr` stream to in-memory buffers. Each
+// begin() pushes a buffer and remembers the stream it replaces; end() pops
+// it, restores that stream and, when nested, appends the captured text to
+// the enclosing buffer so the outer capture sees everything.
+
+namespace {
+    class LogCaptureStack {
+    public:
+        void begin(giac::context* ctx) {
+            Frame frame;
+            frame.previous = giac::logptr(ctx);
+            frame.buffer = std::make_unique<std::ostringstream>();
+            giac::logptr(frame.buffer.get(), ctx);
+            frames_.push_back(std::move(frame));
+        }
+
+        std::string end(giac::context* ctx) {
+            if (frames_.empty()) {
+                throw std::logic_error(
+                    "log_capture_end called without a matching log_capture_begin");
+            }
+            Frame frame = std::move(frames_.back());
+            frames_.pop_back();
+            giac::logptr(frame.previous, ctx);
+            std::string text = frame.buffer->str();
+            if (!frames_.empty()) {
+                *frames_.back().buffer << text;
+            }
+            return text;
+        }
+
+        int depth() const { return static_cast<int>(frames_.size()); }
+
+    private:
+        struct Frame {
+            my_ostream* previous = nullptr;
+            std::unique_ptr<std::ostringstream> buffer;
+        };
+        std::vector<Frame> frames_;
+    };
+}
 
 // ============================================================================
 // Implementation structs (hidden from header)
@@ -34,6 +82,7 @@ struct GiacContextImpl {
     // accessor (only the process-global caseval_maxtime), so this lives on
     // GiacContextImpl. Currently round-trip only — no evaluation interruption.
     double timeout_seconds_;
+    LogCaptureStack log_capture;
 
     GiacContextImpl() : ctx(new giac::context()),
                         warning_handler(nullptr),
@@ -67,6 +116,13 @@ namespace {
         // This prevents crashes during static destruction order
         thread_local giac::context* ctx = new giac::context();
         return *ctx;
+    }
+
+    // Capture stack for the thread-local context. Leaked for the same
+    // reason as the context itself.
+    LogCaptureStack& get_thread_local_log_capture() {
+        thread_local LogCaptureStack* stack = new LogCaptureStack();
+        return *stack;
     }
 }
 
@@ -181,6 +237,23 @@ Gen giac_eval(const std::string& expr, GiacContext& ctx) {
     } catch (const std::exception& e) {
         throw std::runtime_error(std::string("GIAC evaluation error: ") + e.what());
     }
+}
+
+// ============================================================================
+// Log Capture
+// ============================================================================
+
+void log_capture_begin() {
+    initialize_giac_library();
+    get_thread_local_log_capture().begin(&get_thread_local_context());
+}
+
+std::string log_capture_end() {
+    return get_thread_local_log_capture().end(&get_thread_local_context());
+}
+
+int log_capture_depth() {
+    return get_thread_local_log_capture().depth();
 }
 
 // ============================================================================
@@ -499,6 +572,18 @@ void GiacContext::set_warning_handler(std::function<void(const std::string&)> ha
 
 void GiacContext::clear_warning_handler() {
     impl_->warning_handler = nullptr;
+}
+
+void GiacContext::log_capture_begin() {
+    impl_->log_capture.begin(impl_->ctx);
+}
+
+std::string GiacContext::log_capture_end() {
+    return impl_->log_capture.end(impl_->ctx);
+}
+
+int GiacContext::log_capture_depth() const {
+    return impl_->log_capture.depth();
 }
 
 // ============================================================================
