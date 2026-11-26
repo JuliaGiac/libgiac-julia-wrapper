@@ -1,6 +1,7 @@
 # GitHub Actions CI Workflow for GIAC Julia Wrapper
 # Builds and tests on Linux (Ubuntu), macOS, and Windows
-# Uses GIAC_jll for pre-built giac, system packages for GMP/MPFR headers
+# Uses GIAC_jll for pre-built giac, system packages for the GMP/MPFR headers
+# and for the GSL/GLPK headers that GIAC's own headers include
 
 name: CI
 
@@ -69,11 +70,11 @@ jobs:
         run: |
           pip3 install meson ninja
           sudo apt-get update
-          sudo apt-get install -y libgmp-dev libmpfr-dev
+          sudo apt-get install -y libgmp-dev libmpfr-dev libgsl-dev libglpk-dev
 
       - name: Install build tools and dependencies (macOS)
         if: runner.os == 'macOS'
-        run: brew install meson ninja gmp mpfr gettext
+        run: brew install meson ninja gmp mpfr gettext gsl glpk
 
       - name: Setup MSYS2 (Windows)
         if: runner.os == 'Windows'
@@ -88,6 +89,8 @@ jobs:
             mingw-w64-x86_64-pkg-config
             mingw-w64-x86_64-gmp
             mingw-w64-x86_64-mpfr
+            mingw-w64-x86_64-gsl
+            mingw-w64-x86_64-glpk
 
       # -- Install Julia packages and extract JLL paths --
 
