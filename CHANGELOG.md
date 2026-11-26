@@ -8,6 +8,13 @@ Changes before this file was introduced are recorded in the git history.
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-26
+
+Distributed as libgiac_julia_jll 0.6.0, built against GIAC_jll 200.100.0
+(giac 2.1.0, upstream's 5-bit `gen` type field, PARI 2.19.1). The `gen`
+layout differs from GIAC_jll 2.0.x, so this release cannot be used with
+GIAC_jll 2.0.x, nor 0.5.x with GIAC_jll 200.100.0.
+
 ### Changed
 
 - **One default context for the whole process.** The default context used by
@@ -35,3 +42,6 @@ Changes before this file was introduced are recorded in the git history.
   writes straight to `std::cerr`/`std::cout` are not captured.
 - `tests/julia/load_wrapper.jl` honours `GIAC_WRAPPER_LIB`, so the Julia
   tests can run against a library built outside `builddir/`.
+
+[Unreleased]: https://github.com/JuliaGiac/libgiac-julia-wrapper/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/JuliaGiac/libgiac-julia-wrapper/compare/v0.4.0...v0.6.0
