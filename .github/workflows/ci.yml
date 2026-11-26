@@ -104,9 +104,15 @@ jobs:
           CXXWRAP_PREFIX=$(julia -e 'using CxxWrap; print(CxxWrap.prefix_path())')
           GIAC_ARTIFACT=$(julia -e 'using GIAC_jll; print(GIAC_jll.artifact_dir)')
           JULIA_BINDIR=$(julia -e 'print(Sys.BINDIR)')
+          # The lib directories of GIAC_jll's dependencies (PARI, OpenBLAS32,
+          # GSL, GLPK, ...), without Julia's own: libgiac's NEEDED entries
+          # point there, and the linker and the tests must find them.
+          GIAC_DEPS_LIBPATH=$(julia -e 'using GIAC_jll; jl = dirname(Sys.BINDIR); print(join(filter(p -> !startswith(p, jl), split(GIAC_jll.LIBPATH[], Sys.iswindows() ? ";" : ":")), Sys.iswindows() ? ";" : ":"))')
           echo "cxxwrap_prefix=$CXXWRAP_PREFIX" >> $GITHUB_OUTPUT
           echo "giac_artifact=$GIAC_ARTIFACT" >> $GITHUB_OUTPUT
           echo "julia_bindir=$JULIA_BINDIR" >> $GITHUB_OUTPUT
+          echo "giac_deps_libpath=$GIAC_DEPS_LIBPATH" >> $GITHUB_OUTPUT
+          echo "GIAC dependencies: $GIAC_DEPS_LIBPATH"
           echo "CxxWrap prefix: $CXXWRAP_PREFIX"
           echo "GIAC artifact: $GIAC_ARTIFACT"
           echo "--- GIAC include ---"
@@ -120,7 +126,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           echo "LIBRARY_PATH=${{ steps.deps.outputs.giac_artifact }}/lib:$LIBRARY_PATH" >> $GITHUB_ENV
-          echo "LD_LIBRARY_PATH=${{ steps.deps.outputs.giac_artifact }}/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=${{ steps.deps.outputs.giac_artifact }}/lib:${{ steps.deps.outputs.giac_deps_libpath }}:$LD_LIBRARY_PATH" >> $GITHUB_ENV
 
       - name: Set library paths (macOS)
         if: runner.os == 'macOS'
@@ -130,9 +136,10 @@ jobs:
           MPFR_PREFIX=$(brew --prefix mpfr)
           GIAC_LIB=${{ steps.deps.outputs.giac_artifact }}/lib
           echo "LIBRARY_PATH=$GIAC_LIB:$GMP_PREFIX/lib:$MPFR_PREFIX/lib:$GETTEXT_PREFIX/lib:$LIBRARY_PATH" >> $GITHUB_ENV
-          echo "DYLD_LIBRARY_PATH=$GIAC_LIB:$GETTEXT_PREFIX/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "DYLD_LIBRARY_PATH=$GIAC_LIB:${{ steps.deps.outputs.giac_deps_libpath }}:$GETTEXT_PREFIX/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
           echo "PKG_CONFIG_PATH=$GETTEXT_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
-          echo "CPATH=$GETTEXT_PREFIX/include:$CPATH" >> $GITHUB_ENV
+          # GIAC's headers include <gsl/...> and <glpk.h>
+          echo "CPATH=$GETTEXT_PREFIX/include:$(brew --prefix gsl)/include:$(brew --prefix glpk)/include:$CPATH" >> $GITHUB_ENV
 
       - name: Configure (Meson) (Linux/macOS)
         if: runner.os != 'Windows'
