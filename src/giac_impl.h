@@ -84,7 +84,7 @@ Gen giac_eval(const std::string& expr, GiacContext& ctx);
 // also appended to the enclosing capture.
 
 /**
- * @brief Start capturing the log stream of the thread-local default context
+ * @brief Start capturing the log stream of the default context
  */
 void log_capture_begin();
 

@@ -9,8 +9,11 @@ Giac.jl itself.
 
 ## Evaluation
 
-- `giac_eval(expr)` parses and evaluates a string in a thread-local default
-  context, and returns a `Gen`.
+- `giac_eval(expr)` parses and evaluates a string in the default context, and
+  returns a `Gen`. There is one default context for the whole process, shared
+  by every thread: a `:=` binding made from one thread is visible from all of
+  them. GIAC cannot be entered from two threads at once, so callers must
+  serialize their calls (Giac.jl holds a lock around each one).
 - `giac_eval(expr, ctx)` does the same in a `GiacContext`. Each context keeps
   its own `:=` bindings and settings, so two contexts are isolated
   ([#3](https://github.com/JuliaGiac/libgiac-julia-wrapper/issues/3)).

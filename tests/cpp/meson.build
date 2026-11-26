@@ -14,7 +14,7 @@ test_names = [
 foreach t : test_names
   exe = executable(t,
     t + '.cpp',
-    dependencies: [giac_wrapper_dep, jlcxx_dep],
+    dependencies: [giac_wrapper_dep, jlcxx_dep, dependency('threads')],
     link_with: giac_wrapper_lib,
   )
   test(t, exe, timeout: 60)

@@ -4,8 +4,8 @@
 include(joinpath(@__DIR__, "load_wrapper.jl"))
 
 @testset "GIAC Wrapper Gen Tests" begin
-    # The single-arg Gen(::String) constructor uses the wrapper's thread-local
-    # default context. There is no Gen(::String, ::GiacContext) overload
+    # The single-arg Gen(::String) constructor uses the wrapper's default
+    # context. There is no Gen(::String, ::GiacContext) overload
     # registered with CxxWrap, so these tests do NOT pass a context.
 
     @testset "Gen Construction" begin

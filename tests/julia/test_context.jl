@@ -113,4 +113,21 @@ include(joinpath(@__DIR__, "load_wrapper.jl"))
         set_complex_mode(ctx_off, false)
         @test !occursin("i", to_string(giac_eval("factor(x^2+1)", ctx_off)))
     end
+
+    # One default context per process: a binding made from a task on another
+    # thread is visible everywhere. Calls are serialized with a lock, as
+    # Giac.jl does; with a single Julia thread the tasks share it anyway.
+    @testset "default context shared across threads" begin
+        lk = ReentrantLock()
+        giac_eval("jlsharedv := 5")
+        seen = fetch(Threads.@spawn lock(() -> to_string(giac_eval("jlsharedv")), lk))
+        @test seen == "5"
+        wait(Threads.@spawn lock(() -> giac_eval("jlsharedw := 11"), lk))
+        @test to_string(giac_eval("jlsharedw")) == "11"
+        tids = fetch.([Threads.@spawn begin
+                           lock(() -> giac_eval("jlsharedv"), lk)
+                           Threads.threadid()
+                       end for _ in 1:8])
+        @test all(>=(1), tids)
+    end
 end
