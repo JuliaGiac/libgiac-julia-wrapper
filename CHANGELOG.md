@@ -8,6 +8,17 @@ Changes before this file was introduced are recorded in the git history.
 
 ## [Unreleased]
 
+### Changed
+
+- **One default context for the whole process.** The default context used by
+  `giac_eval(expr)`, `apply_func*`, the Tier 1 wrappers and `Gen` methods was
+  `thread_local`: a call from another OS thread silently evaluated in a
+  different, empty context, without the `:=` bindings, assumptions or
+  settings made from the first thread. It is now one context shared by every
+  thread, and so is its log capture stack. GIAC keeps no per-thread state of
+  its own, but it cannot be entered from two threads at once: callers must
+  serialize their calls, as Giac.jl does with its GIAC lock.
+
 ### Added
 
 - **Log capture.** GIAC writes informational messages to the per-context

@@ -7,6 +7,7 @@
 #include <iostream>
 #include <cassert>
 #include <string>
+#include <thread>
 
 using namespace giac_julia;
 
@@ -227,6 +228,21 @@ TEST(complex_mode) {
     }
 }
 
+// The default context is one per process, not one per thread: a binding
+// made from one thread is visible from another. Callers serialize access
+// (Giac.jl holds its GIAC lock around every call).
+TEST(default_context_shared_across_threads) {
+    giac_eval("sharedctxv := 42");
+    std::string seen;
+    std::thread t([&seen]() { seen = giac_eval("sharedctxv").to_string(); });
+    t.join();
+    ASSERT_EQ("42", seen);
+
+    std::thread u([]() { giac_eval("sharedctxw := 7"); });
+    u.join();
+    ASSERT_EQ("7", giac_eval("sharedctxw").to_string());
+}
+
 int main() {
     std::cout << "=== GIAC Wrapper Context Tests ===" << std::endl;
 
@@ -237,6 +253,7 @@ int main() {
     RUN_TEST(timeout_config);
     RUN_TEST(precision_config);
     RUN_TEST(complex_mode);
+    RUN_TEST(default_context_shared_across_threads);
 
     std::cout << "=== All tests passed ===" << std::endl;
     return 0;

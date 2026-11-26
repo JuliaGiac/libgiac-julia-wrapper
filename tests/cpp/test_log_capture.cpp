@@ -14,6 +14,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <thread>
 
 using namespace giac_julia;
 
@@ -155,6 +156,17 @@ TEST(context_end_without_begin_throws) {
     ASSERT_TRUE(threw);
 }
 
+// A capture opened on one thread receives messages from evaluations run on
+// another, since both use the one default context.
+TEST(capture_spans_threads) {
+    log_capture_begin();
+    std::thread t([]() { giac_eval(SERRET); });
+    t.join();
+    std::string log = log_capture_end();
+    ASSERT_TRUE(contains(log, SERRET_HINT));
+    ASSERT_TRUE(log_capture_depth() == 0);
+}
+
 int main() {
     std::cout << "=== GIAC Wrapper Log Capture Tests ===" << std::endl;
 
@@ -169,6 +181,7 @@ int main() {
     RUN_TEST(capture_survives_evaluation_error);
     RUN_TEST(context_capture_is_independent);
     RUN_TEST(context_end_without_begin_throws);
+    RUN_TEST(capture_spans_threads);
 
     std::cout << "=== All tests passed ===" << std::endl;
     return 0;
