@@ -136,7 +136,10 @@ jobs:
           MPFR_PREFIX=$(brew --prefix mpfr)
           GIAC_LIB=${{ steps.deps.outputs.giac_artifact }}/lib
           echo "LIBRARY_PATH=$GIAC_LIB:$GMP_PREFIX/lib:$MPFR_PREFIX/lib:$GETTEXT_PREFIX/lib:$LIBRARY_PATH" >> $GITHUB_ENV
-          echo "DYLD_LIBRARY_PATH=$GIAC_LIB:${{ steps.deps.outputs.giac_deps_libpath }}:$GETTEXT_PREFIX/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "DYLD_LIBRARY_PATH=$GIAC_LIB:$GETTEXT_PREFIX/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+          # Fallback only: in DYLD_LIBRARY_PATH the JLL copies of common
+          # libraries would replace CMake's own, and CMake would not start.
+          echo "DYLD_FALLBACK_LIBRARY_PATH=${{ steps.deps.outputs.giac_deps_libpath }}:/usr/local/lib:/usr/lib" >> $GITHUB_ENV
           echo "PKG_CONFIG_PATH=$GETTEXT_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
           # GIAC's headers include <gsl/...> and <glpk.h>
           echo "CPATH=$GETTEXT_PREFIX/include:$(brew --prefix gsl)/include:$(brew --prefix glpk)/include:$CPATH" >> $GITHUB_ENV
